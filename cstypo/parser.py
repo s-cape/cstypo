@@ -270,7 +270,7 @@ class TxtParser(object):
         """
 
         double = re.compile("""
-                    (?<!"|\w)           # no " or alphachars before
+                    # (?<!"|\w)           # no " or alphachars before
                     "
                     (?!\ |")            # no space or " after
                     ([^"]+)                # whatever in the middle
@@ -281,7 +281,7 @@ class TxtParser(object):
         text = self.sub(double, ur'\u201E\1\u201C', text)
 
         single = re.compile("""
-                    (?<!'|\w)           # no ' or alphachars before
+                    # (?<!'|\w)           # no ' or alphachars before
                     '
                     (?!\ |')            # no space or ' after
                     (.+?)               # whatever
