@@ -51,7 +51,7 @@ API
   - ``cstypo.parser.TxtParser.parse_quotes``
   - ``cstypo.parser.TxtParser.parse_prepositions``
   - ``cstypo.parser.TxtParser.parse_last_short_word``
-
+  - ``cstype.parser.TxtParser.parse_hyphen``
 
 -   ``cstypo.parser.HtmlParser``
 
@@ -85,6 +85,10 @@ Poté je možné začít v šablonách používat filtr.
     {{ text|typify:'html' }}         # zpracování html
     {{ text|typify:'html'|safe }}    # pro povolení vypsání je potřeba filter safe
 
+    {% filter typify:'html' %}       # zpracování bloku
+    <h1>{{ title }}</h1>
+    <p>{{ text }}</p>
+    {% endfilter %}
 
 
 CLI
@@ -104,3 +108,8 @@ CLI
         -v --version            show version.
         --type                  type of parsed file (txt default).
 
+Python 3
+--------
+
+Oproti `originální verzi <https://github.com/yetty/cstypo>`_ by balíček měl fungovat v Pythonu 3.
+Z řetězců a regulárních výrazů je odstraněn prefix ``u`` resp. ``ur``.
