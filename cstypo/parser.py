@@ -156,6 +156,22 @@ class TxtParser(object):
 
         return substituted
 
+    def parse_hyphen(self, text):
+        """
+        Replace in word hyphen with non breaking hyphen.
+
+        >>> parser = TxtParser()
+        >>> parser.parse_dates('E-mail z e-shopu')
+        'E\u2011mail z e\u2011shopu'
+
+        """
+        pattern = re.compile(r"""
+                        (?<=[^!*+,/:;<=>@\\\\_|-])  # cannot be before
+                        -
+                        (?=[^!*+,/:;<=>@\\\\_|-])   # cannot be after
+                   """, re.X | re.U)
+        return self.sub(pattern, '\u2011', text)
+
     def parse_dates(self, text):
         """
         Inserts non breaking space to dates.
