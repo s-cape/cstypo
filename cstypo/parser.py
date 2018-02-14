@@ -59,7 +59,7 @@ class TxtParser(object):
 
         >>> import re
         >>> parser = TxtParser()
-        >>> pattern = re.compile(ur'\.{3}')
+        >>> pattern = re.compile(r'\.{3}')
         >>> parser.sub(pattern, '?', 'First... Second...')
         'First? Second?'
         >>> parser.positions
@@ -94,22 +94,22 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_ellipsis('Simple...')
-        u'Simple\u2026'
+        'Simple\u2026'
 
         >>> parser.parse_ellipsis('More complex... Test. With some dots.')
-        u'More complex\u2026 Test. With some dots.'
+        'More complex\u2026 Test. With some dots.'
 
         Four dots are equal to three -> ellipsis.
         >>> parser.parse_ellipsis('What about four dots....?')
-        u'What about four dots\u2026?'
+        'What about four dots\u2026?'
         """
 
-        pattern = re.compile(ur"""
+        pattern = re.compile(r"""
                     (?<![.\u2026])      # no ellipsis before
                     \.{3,4}             # three or four dots
                     (?![.\u2026])       # no ellipsis after
                  """, re.M | re.U | re.X)
-        return self.sub(pattern, u'\u2026', text)
+        return self.sub(pattern, '\u2026', text)
 
     def parse_en_dash(self, text):
         """
@@ -119,40 +119,40 @@ class TxtParser(object):
 
         Between numbers:
         >>> parser.parse_en_dash('1996-2010')
-        u'1996\u20132010'
+        '1996\u20132010'
         >>> parser.parse_en_dash('2001 - 2002')
-        u'2001 \u2013 2002'
+        '2001 \u2013 2002'
 
         Between specific words (by --):
         >>> parser.parse_en_dash('rychlik Praha--Brno')
-        u'rychlik Praha\u2013Brno'
+        'rychlik Praha\u2013Brno'
         >>> parser.parse_en_dash('1.--3. misto')
-        u'1.\u20133. misto'
+        '1.\u20133. misto'
         >>> parser.parse_en_dash('Mladost -- radost')
-        u'Mladost \u2013 radost'
+        'Mladost \u2013 radost'
 
         As currency mark (,-):
         >>> parser.parse_en_dash('Kcs 30,-')
-        u'Kcs 30,\u2013'
+        'Kcs 30,\u2013'
 
         """
 
-        nums = re.compile(ur"""
+        nums = re.compile(r"""
                     (?<=[\d ])      # numbers or space before
                     -
                     (?=[\d ]|$)     # numbers or space after
                """, re.X | re.U)
-        substituted = self.sub(nums, u'\u2013', text)
+        substituted = self.sub(nums, '\u2013', text)
 
-        alphanum = re.compile(ur"""
+        alphanum = re.compile(r"""
                         (?<=[^!*+,/:;<=>@\\\\_|-])  # cannot be before
                         --
                         (?=[^!*+,/:;<=>@\\\\_|-])   # cannot be after
                    """, re.X | re.U)
-        substituted = self.sub(alphanum, u'\u2013', substituted)
+        substituted = self.sub(alphanum, '\u2013', substituted)
 
-        curr = re.compile(ur',-')
-        substituted = self.sub(curr, ur',\u2013', substituted)
+        curr = re.compile(r',-')
+        substituted = self.sub(curr, ',\u2013', substituted)
 
         return substituted
 
@@ -162,17 +162,17 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_dates('Who was born on 28. 3. 1592?')
-        u'Who was born on 28.\\xa03.\\xa01592?'
+        'Who was born on 28.\\xa03.\\xa01592?'
         >>> parser.parse_dates('9. 5.')
-        u'9.\\xa05.'
+        '9.\\xa05.'
 
         """
 
-        with_year = re.compile(ur'(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)')
-        substituted = with_year.sub(ur'\1\u00a0\2\u00a0\3', text)
+        with_year = re.compile(r'(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)')
+        substituted = with_year.sub(r'\1\u00a0\2\u00a0\3', text)
 
-        without_year = re.compile(ur'(?<!\d)(\d{1,2}\.) (\d{1,2}\.)')
-        substituted = without_year.sub(ur'\1\u00a0\2', substituted)
+        without_year = re.compile(r'(?<!\d)(\d{1,2}\.) (\d{1,2}\.)')
+        substituted = without_year.sub(r'\1\u00a0\2', substituted)
 
         return substituted
 
@@ -183,12 +183,12 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_em_dash('No --- or yes?')
-        u'No\\xa0\u2014 or yes?'
+        'No\\xa0\u2014 or yes?'
 
         """
 
-        pattern = re.compile(ur' --- ')
-        return self.sub(pattern, u'\u00a0\u2014 ', text)
+        pattern = re.compile(r' --- ')
+        return self.sub(pattern, '\u00a0\u2014 ', text)
 
     def parse_arrows(self, text):
         """
@@ -196,27 +196,27 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_arrows('In <--> both ways.')
-        u'In \u2194 both ways.'
+        'In \u2194 both ways.'
         >>> parser.parse_arrows('To --> the right.')
-        u'To \u2192 the right.'
+        'To \u2192 the right.'
         >>> parser.parse_arrows('And to <-- the left.')
-        u'And to \u2190 the left.'
+        'And to \u2190 the left.'
         >>> parser.parse_arrows('Double ==> right.')
-        u'Double \u21d2 right.'
+        'Double \u21d2 right.'
 
         """
 
-        leftright = re.compile(ur'<-{1,2}>')
-        substituted = self.sub(leftright, u'\u2194', text)
+        leftright = re.compile(r'<-{1,2}>')
+        substituted = self.sub(leftright, '\u2194', text)
 
-        right = re.compile(ur'-{1,}>')
-        substituted = self.sub(right, u'\u2192', substituted)
+        right = re.compile(r'-{1,}>')
+        substituted = self.sub(right, '\u2192', substituted)
 
-        left = re.compile(ur'<-{1,}')
-        substituted = self.sub(left, u'\u2190', substituted)
+        left = re.compile(r'<-{1,}')
+        substituted = self.sub(left, '\u2190', substituted)
 
-        double = re.compile(ur'={1,}>')
-        substituted = self.sub(double, u'\u21d2', substituted)
+        double = re.compile(r'={1,}>')
+        substituted = self.sub(double, '\u21d2', substituted)
 
         return substituted
 
@@ -226,12 +226,12 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_plusminus('a = +-10')
-        u'a = \\xb110'
+        'a = \\xb110'
 
         """
 
         plusminus = re.compile('\+-')
-        return self.sub(plusminus, u'\u00b1', text)
+        return self.sub(plusminus, '\u00b1', text)
 
     def parse_dimension(self, text):
         """
@@ -239,19 +239,19 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_dimension('10x20')
-        u'10\\xd720'
+        '10\\xd720'
         >>> parser.parse_dimension('120 x 50 cm')
-        u'120 \\xd7 50 cm'
+        '120 \\xd7 50 cm'
         >>> parser.parse_dimension('5x rychleji')
-        u'5\\xd7 rychleji'
+        '5\\xd7 rychleji'
 
         """
 
-        between = re.compile(ur'(\d+)( ?)x\2(?=\d)')
-        substituted = self.sub(between, ur'\1\2\u00d7\2', text)
+        between = re.compile(r'(\d+)( ?)x\2(?=\d)')
+        substituted = self.sub(between, r'\1\2''\u00d7''\2', text)
 
-        after = re.compile(ur'(?<=\d)x(?=[ ,.]|$)', re.M)
-        substituted = self.sub(after, ur'\u00d7', substituted)
+        after = re.compile(r'(?<=\d)x(?=[ ,.]|$)', re.M)
+        substituted = self.sub(after, '\u00d7', substituted)
 
         return substituted
 
@@ -261,9 +261,9 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_quotes('"Pojd uz," rekla')
-        u'\u201ePojd uz,\u201c rekla'
+        '\u201ePojd uz,\u201c rekla'
         >>> parser.parse_quotes("'Nepujdu,' odvetil.")
-        u'\u201aNepujdu,\u2018 odvetil.'
+        '\u201aNepujdu,\u2018 odvetil.'
         >>> parser.parse_quotes("Pad' a chcip'.")
         "Pad' a chcip'."
 
@@ -278,7 +278,7 @@ class TxtParser(object):
                     "
                     (?!")               # no " after
                 """, re.U | re.X | re.M | re.S)
-        text = self.sub(double, ur'\u201E\1\u201C', text)
+        text = self.sub(double, '\u201E'r'\1''\u201C', text)
 
         single = re.compile("""
                     (?<!'|\w)           # no ' or alphachars before
@@ -289,7 +289,7 @@ class TxtParser(object):
                     '
                     (?!')               # no ' after
                 """, re.U | re.X | re.M | re.S)
-        text = self.sub(single, ur'\u201A\1\u2018', text)
+        text = self.sub(single, '\u201A'r'\1''\u2018', text)
 
         return text
 
@@ -299,28 +299,28 @@ class TxtParser(object):
 
         >>> parser = TxtParser()
         >>> parser.parse_prepositions('Stal opren o zed.')
-        u'Stal opren o\\xa0zed.'
+        'Stal opren o\\xa0zed.'
         >>> parser.parse_prepositions('Pavouk byl i v jogurtu')
-        u'Pavouk byl i\\xa0v\\xa0jogurtu'
+        'Pavouk byl i\\xa0v\\xa0jogurtu'
 
         """
 
-        pattern = re.compile(ur'(?<= |\u00a0)([KkOoSsUuVvZzIiAa]) ', re.M)
+        pattern = re.compile(r'(?<= |\u00a0)([KkOoSsUuVvZzIiAa]) ', re.M)
 
-        return self.sub(pattern, ur'\1\u00a0', text)
+        return self.sub(pattern, r'\1''\u00a0', text)
 
     def parse_last_short_words(self, text):
         """
         Insert non breakable space before short last words.
         """
 
-        pattern = re.compile(ur"""
+        pattern = re.compile(r"""
                         (?<=.{50})
                         \s+
                         (?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)
                     """, re.S | re.X)
 
-        return self.sub(pattern, ur'\u00a0', text)
+        return self.sub(pattern, '\u00a0', text)
 
 
 class HtmlParser(TxtParser):
@@ -331,19 +331,19 @@ class HtmlParser(TxtParser):
 
         >>> parser = HtmlParser('<hr>')
         >>> parser.parse()
-        u'<hr>'
+        '<hr>'
 
         >>> parser = HtmlParser('<p>Dots...</p>')
         >>> parser.parse()
-        u'<p>Dots\u2026</p>'
+        '<p>Dots\u2026</p>'
 
         >>> parser = HtmlParser('T... --- <-- --> <--> ==> 1x2 +-<i>1</i>')
         >>> parser.parse()
-        u'T\u2026\\xa0\u2014 \u2190 \u2192 \u2194 \u21d2 1\\xd72 \\xb1<i>1</i>'
+        'T\u2026\\xa0\u2014 \u2190 \u2192 \u2194 \u21d2 1\\xd72 \\xb1<i>1</i>'
 
         >>> parser = HtmlParser('some <i>more</i> wine.')
         >>> parser.parse()
-        u'some <i>more</i> wine.'
+        'some <i>more</i> wine.'
 
         """
 
