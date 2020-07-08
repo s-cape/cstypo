@@ -185,10 +185,10 @@ class TxtParser(object):
         """
 
         with_year = re.compile(r'(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)')
-        substituted = with_year.sub(r'\1\u00a0\2\u00a0\3', text)
+        substituted = with_year.sub(r'\1''\u00a0'r'\2''\u00a0'r'\3', text)
 
         without_year = re.compile(r'(?<!\d)(\d{1,2}\.) (\d{1,2}\.)')
-        substituted = without_year.sub(r'\1\u00a0\2', substituted)
+        substituted = without_year.sub(r'\1''\u00a0'r'\2', substituted)
 
         return substituted
 
@@ -325,18 +325,19 @@ class TxtParser(object):
 
         return self.sub(pattern, r'\1''\u00a0', text)
 
-    def parse_last_short_words(self, text):
-        """
-        Insert non breakable space before short last words.
-        """
-
-        pattern = re.compile(r"""
-                        (?<=.{50})
-                        \s+
-                        (?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)
-                    """, re.S | re.X)
-
-        return self.sub(pattern, '\u00a0', text)
+# TODO: causes infinite recursion, disabled for now
+#    def parse_last_short_words(self, text):
+#        """
+#        Insert non breakable space before short last words.
+#        """
+#
+#        pattern = re.compile(r"""
+#                        (?<=.{50})
+#                        \s+
+#                        (?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)
+#                    """, re.S | re.X)
+#
+#        return self.sub(pattern, '\u00a0', text)
 
 
 class HtmlParser(TxtParser):
